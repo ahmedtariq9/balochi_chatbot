@@ -499,8 +499,8 @@ FEW-SHOT EXAMPLES TO FOLLOW:
         return;
       }
 
-      if (!inputVal.startsWith('AIzaSy')) {
-        errBox.innerHTML = 'Gemini کی API Key عام طور پر <b>AIzaSy</b> سے شروع ہوتی ہے۔ براہ کرم aistudio.google.com سے کاپی کریں۔';
+      if (!inputVal.startsWith('AIzaSy') && !inputVal.startsWith('AQ.')) {
+        errBox.innerHTML = 'Gemini کی API Key عام طور پر <b>AIzaSy</b> یا <b>AQ.</b> سے شروع ہوتی ہے۔ براہ کرم aistudio.google.com سے کاپی کریں۔';
         errBox.classList.remove('hidden');
         return;
       }

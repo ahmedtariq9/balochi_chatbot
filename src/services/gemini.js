@@ -16,10 +16,13 @@ export async function verifyApiKey(apiKey) {
   // Sanitize: strip quotes, spaces, newlines
   const trimmedKey = apiKey.replace(/["'\s]/g, '');
 
-  if (!trimmedKey.startsWith('AIzaSy')) {
-    return { 
-      valid: false, 
-      error: 'Invalid key format. A valid Gemini API key usually starts with "AIzaSy". Get a free key at https://aistudio.google.com/app/apikey' 
+  // Accept both key formats: classic standard keys ("AIzaSy...") and
+  // auth keys ("AQ....") issued by Google AI Studio since 28 May 2026.
+  // The live ping below is the real validity check.
+  if (!trimmedKey.startsWith('AIzaSy') && !trimmedKey.startsWith('AQ.')) {
+    return {
+      valid: false,
+      error: 'Invalid key format. A valid Gemini API key starts with "AIzaSy" or "AQ.". Get a free key at https://aistudio.google.com/app/apikey'
     };
   }
 

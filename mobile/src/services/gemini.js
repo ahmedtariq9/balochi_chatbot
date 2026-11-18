@@ -13,8 +13,8 @@ export async function verifyApiKey(apiKey) {
 
   const cleanKey = apiKey.replace(/["'\s]/g, '');
 
-  if (!cleanKey.startsWith('AIzaSy')) {
-    return { valid: false, error: 'Gemini API keys typically start with "AIzaSy".' };
+  if (!cleanKey.startsWith('AIzaSy') && !cleanKey.startsWith('AQ.')) {
+    return { valid: false, error: 'Gemini API keys typically start with "AIzaSy" or "AQ.".' };
   }
 
   try {
