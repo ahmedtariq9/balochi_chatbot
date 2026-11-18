@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="bal" dir="ltr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>SuleimaniGPT | سلیمانی بلوچی اے آئی</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            emerald: {
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+            balochi: ['"Noto Sans Arabic"', '"Noto Nastaliq Urdu"', 'Tahoma', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts for crisp Balochi and English typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Native App Mobile Feel */
+    html, body {
+      height: 100%;
+      height: -webkit-fill-available;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      background-color: #020617;
+      color: #f8fafc;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .font-balochi {
+      font-family: 'Noto Sans Arabic', 'Noto Nastaliq Urdu', Tahoma, sans-serif;
+      line-height: 1.9;
+    }
+    /* Smooth typing cursor */
+    .cursor-blink {
+      display: inline-block;
+      width: 2.5px;
+      height: 1.15em;
+      vertical-align: -0.15em;
+      background-color: #10b981;
+      margin-left: 2px;
+      animation: blink 0.8s infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Custom Mobile Scrollbars */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 9999px; }
+
+    /* Safe Area Padding for mobile gesture bar */
+    .safe-bottom {
+      padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    }
+    .safe-top {
+      padding-top: max(8px, env(safe-area-inset-top, 8px));
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col h-full w-full">
+
+  <!-- Mobile Drawer Backdrop -->
+  <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+
+  <!-- Mobile Slide-out Drawer -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800/90 flex flex-col transition-transform duration-250 ease-out -translate-x-full shadow-2xl">
+    <!-- Drawer Header -->
+    <div class="p-4 border-b border-slate-800 flex items-center justify-between safe-top">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-md">
+          س
+        </div>
+        <div>
+          <h1 class="font-bold text-sm text-white leading-tight">SuleimaniGPT</h1>
+          <p class="text-[11px] text-emerald-400 font-balochi">سلیمانی بلوچی اے آئی</p>
+        </div>
+      </div>
+      <button onclick="toggleSidebar(false)" class="p-1.5 text-slate-400 hover:text-white rounded-lg">✕</button>
+    </div>
+
+    <!-- New Chat Button -->
+    <div class="p-3">
+      <button onclick="createNewChat()" class="w-full py-2.5 px-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition shadow-sm">
+        <span>+</span>
+        <span>نوکیں گپ (New Chat)</span>
+      </button>
+    </div>
+
+    <!-- Script Mode Selector -->
+    <div class="px-3 pb-2">
+      <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 text-[11px]">
+        <div class="text-slate-400 mb-1.5 font-medium flex items-center justify-between">
+          <span>رسم الخط (Script):</span>
+          <span id="active-script-badge" class="text-emerald-400 font-mono text-[10px]">AUTO</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1">
+          <button id="script-btn-auto" onclick="setScriptMode('auto')" class="py-1 rounded bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-medium">Auto</button>
+          <button id="script-btn-arabic" onclick="setScriptMode('arabic')" class="py-1 rounded text-slate-400 hover:bg-slate-800 font-balochi">بلوچی</button>
+          <button id="script-btn-roman" onclick="setScriptMode('roman')" class="py-1 rounded text-slate-400 hover:bg-slate-800">Roman</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat History List -->
+    <div class="flex-1 overflow-y-auto px-3 py-1 space-y-1">
+      <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-1 py-1">Saved Chats</div>
+      <div id="session-list" class="space-y-1"></div>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-3 border-t border-slate-800 bg-slate-950/60 safe-bottom space-y-2">
+      <button onclick="openApiKeyModal()" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-xs flex items-center justify-between text-slate-300">
+        <div class="flex items-center gap-2">
+          <span id="key-indicator-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span id="key-display" class="font-mono text-[11px]">No Key Set</span>
+        </div>
+        <span class="text-xs text-emerald-400 font-medium">Settings ⚙️</span>
+      </button>
+
+      <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
+        <button onclick="clearAllChats()" class="hover:text-red-400 transition">Clear Chats</button>
+        <span class="text-emerald-500 font-mono text-[10px]">gemini-3.8-flash</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile Top Header Bar -->
+  <header class="h-14 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-3.5 flex items-center justify-between shrink-0 safe-top z-30">
+    <div class="flex items-center gap-2.5">
+      <button onclick="toggleSidebar(true)" class="p-2 -ml-1 text-slate-300 hover:text-white active:bg-slate-800 rounded-lg transition" aria-label="Open menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+      </button>
+
+      <div>
+        <div class="flex items-center gap-1.5">
+          <span class="font-bold text-sm text-white">SuleimaniGPT</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        </div>
+        <div class="text-[10px] font-balochi text-emerald-400 leading-none">سلیمانی بلوچی اے آئی</div>
+      </div>
+    </div>
+
+    <!-- Quick Action Pills -->
+    <div class="flex items-center gap-1.5">
+      <button onclick="cycleScriptMode()" id="header-script-btn" class="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700/80 text-[10px] font-semibold text-slate-300 active:scale-95 transition">
+        Auto
+      </button>
+
+      <button onclick="openApiKeyModal()" id="header-key-btn" class="px-2 py-1 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-300 text-[10px] font-semibold flex items-center gap-1 active:scale-95 transition">
+        <span>🔑</span>
+        <span id="header-key-text">Key</span>
+      </button>
+
+      <button onclick="createNewChat()" class="w-8 h-8 rounded-lg bg-emerald-600 active:bg-emerald-500 text-white flex items-center justify-center font-bold text-base shadow-sm" title="New Chat">
+        +
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Chat Stream Area -->
+  <main id="chat-container" class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 max-w-2xl mx-auto w-full">
+    <!-- Welcome Empty State -->
+    <div id="starter-cards" class="py-6 sm:py-8 text-center animate-fade-in">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-lg shadow-emerald-950/40 mx-auto mb-3 flex items-center justify-center">
+        <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-emerald-400 text-xl font-bold font-balochi">
+          س
+        </div>
+      </div>
+
+      <h2 class="text-2xl sm:text-3xl font-bold font-balochi text-white mb-1.5 leading-snug">
+        وَش آتکے! مَں تَھی سلیمانی بلوچی اے آئی آں
+      </h2>
+      <p class="text-xs text-slate-400 mb-5 max-w-xs mx-auto">
+        Speak in Balochi, Urdu, or English. SuleimaniGPT responds exclusively in authentic Eastern Balochi.
+      </p>
+
+      <!-- 4 Simple Touch Prompt Chips -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
+        <div onclick="sendStarterPrompt(1)" class="p-3 rounded-xl bg-slate-900 border border-slate-800 active:border-emerald-500/60 active:bg-slate-850 cursor-pointer transition">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="text-[11px] font-semibold text-emerald-400">Casual Chat</span>
+            <span class="text-base font-bold font-balochi text-white">حال احوال</span>
+          </div>
+          <div class="text-[11px] text-slate-400 font-balochi text-right">سلیمانی بلوچی ٹی روتینی گپ ءُ تران کن</div>
+        </div>
+
+        <div onclick="sendStarterPrompt(2)" class="p-3 rounded-xl bg-slate-900 border border-slate-800 active:border-emerald-500/60 active:bg-slate-850 cursor-pointer transition">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="text-[11px] font-semibold text-emerald-400">Heritage</span>
+            <span class="text-base font-bold font-balochi text-white">شاعری ءُ راجدپتر</span>
+          </div>
+          <div class="text-[11px] text-slate-400 font-balochi text-right">میر چاکر، گوہرام، ءُ دپتری قصہ</div>
+        </div>
+
+        <div onclick="sendStarterPrompt(3)" class="p-3 rounded-xl bg-slate-900 border border-slate-800 active:border-emerald-500/60 active:bg-slate-850 cursor-pointer transition">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="text-[11px] font-semibold text-emerald-400">Translation</span>
+            <span class="text-base font-bold font-balochi text-white">سلیمانی ترجما</span>
+          </div>
+          <div class="text-[11px] text-slate-400 font-balochi text-right">اردو یا انگریزی نبشتانکاں سلیمانی ٹی بدل کن</div>
+        </div>
+
+        <div onclick="sendStarterPrompt(4)" class="p-3 rounded-xl bg-slate-900 border border-slate-800 active:border-emerald-500/60 active:bg-slate-850 cursor-pointer transition">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="text-[11px] font-semibold text-emerald-400">Tech & Coding</span>
+            <span class="text-base font-bold font-balochi text-white">ٹیکنالوجی</span>
+          </div>
+          <div class="text-[11px] text-slate-400 font-balochi text-right">کمپیوٹر پروگرامنگ ءُ اے آئی سِکھ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message Bubbles Container -->
+    <div id="messages-list" class="space-y-3 pb-2"></div>
+
+    <!-- Error Banner -->
+    <div id="error-box" class="hidden p-3 bg-red-950/50 border border-red-800/80 text-red-200 text-xs rounded-xl flex items-center justify-between gap-2 shadow-lg">
+      <span id="error-text" class="leading-relaxed"></span>
+      <button onclick="openApiKeyModal()" class="px-2.5 py-1 bg-red-900 rounded-lg text-white font-medium text-[11px] shrink-0">Fix Key</button>
+    </div>
+
+    <div id="scroll-bottom-anchor" class="h-2"></div>
+  </main>
+
+  <!-- Mobile Clean Input Bar (Pinned at Bottom) -->
+  <footer class="p-2.5 sm:p-3 bg-slate-950/95 border-t border-slate-800/80 safe-bottom shrink-0 z-30">
+    <div class="max-w-2xl mx-auto flex items-end gap-2">
+      <div class="flex-1 rounded-2xl bg-slate-900 border border-slate-700/80 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 flex items-center px-3 py-1.5 shadow-inner">
+        <textarea
+          id="chat-input"
+          rows="1"
+          placeholder="سلیمانی، اردو یا انگریزی ٹی کُجھ جست کن..."
+          oninput="handleInputAutoResize(this)"
+          onkeydown="handleInputKeyDown(event)"
+          class="w-full bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none resize-none max-h-28 py-1 leading-relaxed"
+        ></textarea>
+      </div>
+
+      <button
+        id="send-btn"
+        onclick="handleSend()"
+        class="w-10 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-950/50 transition"
+        title="Send"
+      >
+        <svg id="send-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Clean Bottom Sheet API Key Modal -->
+  <div id="api-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl p-5 max-w-md w-full shadow-2xl space-y-3.5 safe-bottom max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="text-emerald-400">🔑</span>
+          <h3 class="text-sm font-bold text-white">Google AI Studio API Key</h3>
+        </div>
+        <button onclick="closeApiKeyModal()" class="text-slate-400 hover:text-white p-1 text-base">✕</button>
+      </div>
+
+      <div class="text-[11px] text-slate-300 space-y-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800 leading-relaxed">
+        <div class="font-bold text-emerald-400">مفت Key حاصل کریں:</div>
+        <p>1. <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-emerald-400 underline font-medium">aistudio.google.com/app/apikey</a> پر جائیں۔</p>
+        <p>2. "Create API Key" دبا کر کی کاپی کریں۔</p>
+        <p>3. نیچے باکس میں پیسٹ کریں۔</p>
+      </div>
+
+      <div class="space-y-1">
+        <input
+          type="text"
+          id="modal-key-input"
+          placeholder="AIzaSy..."
+          spellcheck="false"
+          autocomplete="off"
+          class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+        />
+        <div id="modal-error" class="hidden text-[11px] text-red-400 pt-1 leading-snug"></div>
+      </div>
+
+      <div class="flex gap-2 pt-1">
+        <button
+          id="modal-verify-btn"
+          onclick="verifyAndSaveKey()"
+          class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-semibold rounded-xl text-xs transition"
+        >
+          Verify & Save
+        </button>
+        <button
+          onclick="clearApiKey()"
+          class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-300 rounded-xl text-xs font-medium transition"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Application Engine & Models ---
+    const MODEL_NAME = 'gemini-3.8-flash';
+    const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
+
+    const BASE_SYSTEM_INSTRUCTION = `ROLE:
+You are a native, highly fluent AI Assistant speaking exclusively in pure **Suleimani Balochi (سلیمانی بلوچی / Eastern Balochi)** — the authentic Balochi dialect spoken across the Suleiman Range, Eastern Balochistan (Kohlu, Dera Bugti, Barkhan, Sibi, Nasirabad, Jaffarabad), Dera Ghazi Khan, Rajanpur, and Jacobabad/Sindh regions.
+
+STRICT LINGUISTIC RULES:
+1. **ONLY SULEIMANI BALOCHI:** You must respond STRICTLY and ONLY in Suleimani Balochi. No matter what language the user writes in (Urdu, English, Sindhi, Roman Urdu, etc.), your response must be delivered in natural, pure Suleimani Balochi.
+2. **NO BRAHUI (براہوئی منع ہے):** NEVER confuse Brahui (a Dravidian language using words like 'kanā', 'nī', 'barēk', 'hining') with Balochi. You speak Balochi, NOT Brahui.
+3. **SULEIMANI DIALECT AUTHENTICITY (NOT HEAVY MAKRANI/PERSIAN):**
+   - Use natural Suleimani pronouns, verbs, and phonetics:
+     - I / Me / My: \`Man\` / \`Ma\` (مَں / ما), \`Manī\` (مَنی)
+     - You / Your: \`Tha\` / \`Thau\` (تَہ / تَو), \`Thī\` (تھی), Plural: \`Shwā\` (شوا)
+     - We / Our: \`Mā\` (ما), \`Mē\` (مے)
+     - What / How / Why: \`Chē\` (چے), \`Chōn\` (چوں), \`Chīā\` / \`Chē lajā\` (چیا)
+     - Common Verbs & Phrases: \`Chē hāl ēn?\` (چے حال ایں؟ - How are you?), \`Wash ātkē\` (وَش آتکے - Welcome), \`Gushag / Gushtha\` (گُشگ / گُشتہ - To say/said), \`Gindag / Dīthag\` (گِندگ / دِیتھگ - To see/saw), \`Khāyag / Ātkha\` (کھایگ / آتکھہ - To come/came), \`Bīag\` (بِیگ - To be), \`Wathī\` (وَتھی - Own).
+4. **PURE VOCABULARY:** Avoid unnecessary Urdu, Hindi, or English words unless they are modern technical terms (like "API", "Software", "Internet") that have no natural Balochi equivalent.
+5. **SCRIPT MATCHING RULE:**
+   - If the user writes in **Roman script** (e.g., Roman Urdu, English, or Roman Balochi), reply in clear, easy-to-read **Roman Suleimani Balochi**.
+   - If the user writes in **Perso-Arabic script** (Urdu, Sindhi, or Balochi script \`بلوچی\`), reply in standard **Balochi Perso-Arabic script (بلوچی رسم الخط)**.
+   - If the user explicitly asks for both scripts or a translation, provide both.
+6. **CULTURAL TONE:** Keep your tone warm, respectful, hospitable (\`Mayār\` & \`Balōchī dōd\`), and intellectually helpful.
+
+FEW-SHOT EXAMPLES TO FOLLOW:
+- User: "Kese ho bhai, kya kar rahe ho?"
+  Assistant (Roman Suleimani): "Wash ātkē brāth! Allāhē shukr ēn, man wash āں. Thī chē hāl ahwāl ēn? Man ēdā thī madath kī tayār āں. Gush, marōchī chē kāré kanūn?"
+- User: "آپ کون ہیں اور میری کیا مدد کر سکتے ہیں؟"
+  Assistant (Perso-Arabic Suleimani): "وَش آتکے! مَں تَھی سلیمانی بلوچی اے آئی سنگت آں۔ تَو مَنی گوں ہر وڑیں گپ جَث کُرتَہ کَنے—علم، ٹیکنالوجی، بلوچی شاعری، یا روتینی کارانی باروا۔ تَو گُش، مَں تَھی چے مدَت کُرتَہ کَناں؟"`;
+
+    const STARTER_PROMPTS_DATA = {
+      1: 'سلام براتھ! چے حال ایں؟ مروچی کَہڑے کار ءَ سرگپتگے؟ مئے گوں سلیمانی بلوچی ٹی گپ ءُ تران کن۔',
+      2: 'سلیمانی بلوچی شاعری، میر چاکر و گوہرام جنگی داستان، ءُ سلیمانی دمگ ءِ راجدپتر ءِ باروا مانا تفصیلی سرپدی بدے۔',
+      3: 'اے فقرہ سلیمانی بلوچی رسم الخط ءُ رومن بلوچی ہردوئیناں ترجما کن: "Education and technology are essential for the prosperity of Balochistan."',
+      4: 'کمپیوٹر پروگرامنگ ءُ آرٹیفیشل انٹیلیجنس (AI) چے اِنت؟ مانا سلیمانی بلوچی ٹی آسانیں مثالاں گوں سرپد کن۔'
+    };
+
+    // --- State ---
+    let apiKey = localStorage.getItem('suleimani_gemini_api_key') || '';
+    let scriptMode = localStorage.getItem('suleimani_script_mode') || 'auto';
+    let sessions = [];
+    try {
+      const saved = localStorage.getItem('suleimani_chat_sessions');
+      if (saved) sessions = JSON.parse(saved);
+    } catch(e) {}
+    if (!sessions || sessions.length === 0) {
+      sessions = [{ id: 'sess_' + Date.now(), title: 'نوکیں گپ (New Chat)', messages: [] }];
+    }
+    let currentSessionId = sessions[0].id;
+    let isStreaming = false;
+    let abortController = null;
+
+    function isArabicScript(text) {
+      if (!text) return false;
+      const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g;
+      const matches = text.match(arabicRegex) || [];
+      const latinMatches = text.match(/[a-zA-Z]/g) || [];
+      return matches.length >= latinMatches.length && matches.length > 0;
+    }
+
+    function getEffectiveSystemInstruction() {
+      if (scriptMode === 'arabic') {
+        return BASE_SYSTEM_INSTRUCTION + '\n\nUSER SCRIPT OVERRIDE: Perso-Arabic Balochi script mode selected. Reply in Balochi Perso-Arabic script (بلوچی رسم الخط).';
+      }
+      if (scriptMode === 'roman') {
+        return BASE_SYSTEM_INSTRUCTION + '\n\nUSER SCRIPT OVERRIDE: Roman Balochi script mode selected. Reply in standardized Roman Suleimani Balochi.';
+      }
+      return BASE_SYSTEM_INSTRUCTION;
+    }
+
+    function saveSessions() {
+      try {
+        localStorage.setItem('suleimani_chat_sessions', JSON.stringify(sessions));
+      } catch(e) {}
+      renderSessionList();
+    }
+
+    // --- Drawer & UI ---
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (open) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    function cycleScriptMode() {
+      const modes = ['auto', 'arabic', 'roman'];
+      const nextIdx = (modes.indexOf(scriptMode) + 1) % modes.length;
+      setScriptMode(modes[nextIdx]);
+    }
+
+    function setScriptMode(mode) {
+      scriptMode = mode;
+      localStorage.setItem('suleimani_script_mode', mode);
+      
+      const labels = { auto: 'Auto', arabic: 'بلوچی', roman: 'Roman' };
+      document.getElementById('active-script-badge').innerText = mode.toUpperCase();
+      document.getElementById('header-script-btn').innerText = labels[mode] || 'Auto';
+
+      ['auto', 'arabic', 'roman'].forEach(m => {
+        const btn = document.getElementById('script-btn-' + m);
+        if (m === mode) {
+          btn.className = 'py-1 rounded bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-medium';
+        } else {
+          btn.className = 'py-1 rounded text-slate-400 hover:bg-slate-800';
+        }
+      });
+    }
+
+    function updateKeyStatusUI() {
+      const keyDisplay = document.getElementById('key-display');
+      const keyDot = document.getElementById('key-indicator-dot');
+      const headerBtn = document.getElementById('header-key-btn');
+      const headerText = document.getElementById('header-key-text');
+
+      if (apiKey) {
+        keyDisplay.innerText = apiKey.slice(0, 5) + '...' + apiKey.slice(-3);
+        keyDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        headerBtn.className = 'px-2 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 text-[10px] font-semibold flex items-center gap-1';
+        headerText.innerText = 'Key ✓';
+      } else {
+        keyDisplay.innerText = 'No Key Set';
+        keyDot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        headerBtn.className = 'px-2 py-1 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-300 text-[10px] font-semibold flex items-center gap-1';
+        headerText.innerText = 'Set Key';
+      }
+    }
+
+    function openApiKeyModal() {
+      document.getElementById('modal-key-input').value = apiKey;
+      document.getElementById('modal-error').classList.add('hidden');
+      document.getElementById('api-modal').classList.remove('hidden');
+      toggleSidebar(false);
+      setTimeout(() => document.getElementById('modal-key-input').focus(), 150);
+    }
+
+    function closeApiKeyModal() {
+      document.getElementById('api-modal').classList.add('hidden');
+    }
+
+    function clearApiKey() {
+      apiKey = '';
+      localStorage.removeItem('suleimani_gemini_api_key');
+      updateKeyStatusUI();
+      closeApiKeyModal();
+    }
+
+    async function verifyAndSaveKey() {
+      let inputVal = document.getElementById('modal-key-input').value.trim();
+      inputVal = inputVal.replace(/["'\s]/g, '');
+      document.getElementById('modal-key-input').value = inputVal;
+
+      const errBox = document.getElementById('modal-error');
+      const verifyBtn = document.getElementById('modal-verify-btn');
+
+      if (!inputVal) {
+        errBox.innerHTML = 'براہ کرم اپنی Google AI Studio API Key درج کریں۔';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      if (!inputVal.startsWith('AIzaSy')) {
+        errBox.innerHTML = 'Gemini کی API Key عام طور پر <b>AIzaSy</b> سے شروع ہوتی ہے۔ براہ کرم aistudio.google.com سے کاپی کریں۔';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      verifyBtn.innerText = 'Pinging Gemini 3.8 Flash...';
+      verifyBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/models/${MODEL_NAME}:generateContent?key=${inputVal}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: 'Ping' }] }],
+            generationConfig: { maxOutputTokens: 2, temperature: 0.1 }
+          })
+        });
+
+        if (res.ok) {
+          apiKey = inputVal;
+          localStorage.setItem('suleimani_gemini_api_key', inputVal);
+          updateKeyStatusUI();
+          closeApiKeyModal();
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          errBox.innerText = errData?.error?.message || `HTTP ${res.status}: Invalid Key.`;
+          errBox.classList.remove('hidden');
+        }
+      } catch (err) {
+        errBox.innerText = 'Connection error: ' + err.message;
+        errBox.classList.remove('hidden');
+      } finally {
+        verifyBtn.innerText = 'Verify & Save';
+        verifyBtn.disabled = false;
+      }
+    }
+
+    // --- Chat State & Rendering ---
+    function getCurrentSession() {
+      return sessions.find(s => s.id === currentSessionId) || sessions[0];
+    }
+
+    function createNewChat() {
+      if (isStreaming && abortController) abortController.abort();
+      const newSess = { id: 'sess_' + Date.now(), title: 'نوکیں گپ (New Chat)', messages: [] };
+      sessions.unshift(newSess);
+      currentSessionId = newSess.id;
+      saveSessions();
+      renderChatMessages();
+      toggleSidebar(false);
+      document.getElementById('chat-input').focus();
+    }
+
+    function clearAllChats() {
+      if (confirm('Delete all chats?')) {
+        sessions = [{ id: 'sess_' + Date.now(), title: 'نوکیں گپ (New Chat)', messages: [] }];
+        currentSessionId = sessions[0].id;
+        saveSessions();
+        renderChatMessages();
+        toggleSidebar(false);
+      }
+    }
+
+    function renderSessionList() {
+      const listEl = document.getElementById('session-list');
+      listEl.innerHTML = '';
+      sessions.forEach(s => {
+        const isActive = s.id === currentSessionId;
+        const item = document.createElement('div');
+        item.className = `p-2 rounded-xl cursor-pointer text-xs flex items-center justify-between group transition ${isActive ? 'bg-slate-800 text-white font-medium border border-slate-700' : 'text-slate-400 hover:bg-slate-800/50'}`;
+        item.innerHTML = `
+          <div class="truncate flex items-center gap-2 flex-1 mr-1">
+            <span>💬</span>
+            <span class="truncate">${escapeHtml(s.title || 'سلیمانی گپ')}</span>
+          </div>
+          <button onclick="deleteSession('${s.id}', event)" class="p-1 hover:text-red-400 text-slate-500">✕</button>
+        `;
+        item.onclick = () => {
+          currentSessionId = s.id;
+          saveSessions();
+          renderChatMessages();
+          toggleSidebar(false);
+        };
+        listEl.appendChild(item);
+      });
+    }
+
+    function deleteSession(id, e) {
+      e.stopPropagation();
+      sessions = sessions.filter(s => s.id !== id);
+      if (sessions.length === 0) {
+        sessions = [{ id: 'sess_' + Date.now(), title: 'نوکیں گپ (New Chat)', messages: [] }];
+      }
+      currentSessionId = sessions[0].id;
+      saveSessions();
+      renderChatMessages();
+    }
+
+    function renderChatMessages() {
+      const sess = getCurrentSession();
+      const starterEl = document.getElementById('starter-cards');
+      const messagesEl = document.getElementById('messages-list');
+      const errorBox = document.getElementById('error-box');
+      errorBox.classList.add('hidden');
+
+      if (!sess.messages || sess.messages.length === 0) {
+        starterEl.classList.remove('hidden');
+        messagesEl.innerHTML = '';
+        return;
+      }
+
+      starterEl.classList.add('hidden');
+      messagesEl.innerHTML = '';
+
+      sess.messages.forEach((msg, idx) => {
+        const isUser = msg.role === 'user';
+        const isRtl = isArabicScript(msg.content);
+        const card = document.createElement('div');
+        
+        card.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in`;
+
+        // Modern Speech Bubble Layout
+        card.innerHTML = `
+          <div class="max-w-[88%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 shadow-sm ${
+            isUser
+              ? 'bg-emerald-600 text-white rounded-tr-sm'
+              : 'bg-slate-900 border border-slate-800 text-slate-100 rounded-tl-sm'
+          }">
+            <div class="flex items-center justify-between gap-3 text-[10px] mb-1.5 opacity-75">
+              <span>${isUser ? 'You' : 'SuleimaniGPT'}</span>
+              ${!isUser && msg.content ? `
+                <div class="flex items-center gap-2">
+                  <button onclick="speakMsg('${encodeURIComponent(msg.content)}')" class="hover:text-emerald-300">🔊</button>
+                  <button onclick="copyMsg('${encodeURIComponent(msg.content)}', this)" class="hover:text-emerald-300">Copy</button>
+                </div>
+              ` : ''}
+            </div>
+
+            <div dir="${isRtl ? 'rtl' : 'ltr'}" class="${
+              isRtl ? 'font-balochi text-right text-base leading-loose' : 'text-left text-sm leading-relaxed'
+            } whitespace-pre-wrap break-words">
+              ${formatMessageText(msg.content)}
+            </div>
+          </div>
+        `;
+        messagesEl.appendChild(card);
+      });
+
+      scrollBottom();
+    }
+
+    function formatMessageText(text) {
+      if (!text) return '<span class="cursor-blink"></span>';
+      return escapeHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>');
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function copyMsg(encodedText, btn) {
+      const text = decodeURIComponent(encodedText);
+      navigator.clipboard.writeText(text);
+      const orig = btn.innerText;
+      btn.innerText = 'Copied!';
+      setTimeout(() => btn.innerText = orig, 1500);
+    }
+
+    function speakMsg(encodedText) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const text = decodeURIComponent(encodedText);
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.95;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function scrollBottom() {
+      const container = document.getElementById('chat-container');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function handleInputAutoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+      
+      const isRtl = isArabicScript(el.value);
+      el.dir = isRtl ? 'rtl' : 'ltr';
+      el.className = `w-full bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none resize-none max-h-28 py-1 leading-relaxed ${
+        isRtl ? 'font-balochi text-right text-base' : 'text-left'
+      }`;
+    }
+
+    function handleInputKeyDown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    }
+
+    function sendStarterPrompt(id) {
+      const promptText = STARTER_PROMPTS_DATA[id];
+      if (promptText) {
+        document.getElementById('chat-input').value = promptText;
+        handleSend();
+      }
+    }
+
+    // --- Sending Messages (Gemini 3.8 Flash Streaming) ---
+    async function handleSend() {
+      const inputEl = document.getElementById('chat-input');
+      const text = inputEl.value.trim();
+      if (!text || isStreaming) return;
+
+      if (!apiKey) {
+        openApiKeyModal();
+        return;
+      }
+
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
+
+      const sess = getCurrentSession();
+      if (sess.messages.length === 0) {
+        sess.title = text.slice(0, 24) + (text.length > 24 ? '...' : '');
+      }
+
+      sess.messages.push({ role: 'user', content: text });
+      sess.messages.push({ role: 'assistant', content: '' });
+      renderChatMessages();
+
+      isStreaming = true;
+      const sendBtn = document.getElementById('send-btn');
+      sendBtn.className = 'w-10 h-10 rounded-full bg-red-600 active:scale-95 text-white flex items-center justify-center shrink-0 shadow-md transition';
+      sendBtn.innerHTML = '<span class="text-xs">■</span>';
+
+      abortController = new AbortController();
+
+      try {
+        const contents = sess.messages.slice(0, -1).map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }]
+        }));
+
+        while (contents.length > 0 && contents[0].role !== 'user') contents.shift();
+
+        const url = `${API_BASE_URL}/models/${MODEL_NAME}:streamGenerateContent?alt=sse&key=${apiKey.trim()}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: getEffectiveSystemInstruction() }] },
+            contents,
+            generationConfig: { temperature: 0.3, maxOutputTokens: 4096 }
+          }),
+          signal: abortController.signal
+        });
+
+        if (!response.ok) {
+          const errJson = await response.json().catch(() => ({}));
+          throw new Error(errJson?.error?.message || `HTTP ${response.status}: API Error`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let accumulated = '';
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data: ')) continue;
+            const jsonStr = trimmed.slice(6).trim();
+            if (!jsonStr || jsonStr === '[DONE]') continue;
+
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const chunk = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (chunk) {
+                accumulated += chunk;
+                sess.messages[sess.messages.length - 1].content = accumulated;
+                renderChatMessages();
+              }
+            } catch (e) {}
+          }
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          const errorBox = document.getElementById('error-box');
+          document.getElementById('error-text').innerText = 'Suleimani Balochi Engine: ' + err.message;
+          errorBox.classList.remove('hidden');
+        }
+      } finally {
+        isStreaming = false;
+        abortController = null;
+        sendBtn.className = 'w-10 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-950/50 transition';
+        sendBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>';
+        saveSessions();
+      }
+    }
+
+    // --- Init ---
+    updateKeyStatusUI();
+    setScriptMode(scriptMode);
+    renderSessionList();
+    renderChatMessages();
+
+    if (!apiKey) {
+      setTimeout(openApiKeyModal, 400);
+    }
+  </script>
+</body>
+</html>
