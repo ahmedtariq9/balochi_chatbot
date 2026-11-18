@@ -1,0 +1,75 @@
+name: Build & Release Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build SuleimaniGPT Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x ./android/gradlew
+
+      - name: Sync Web Assets to Android Assets
+        run: |
+          mkdir -p ./android/app/src/main/assets
+          cp standalone.html ./android/app/src/main/assets/index.html
+
+      - name: Build Android APK
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Rename APK Output
+        run: |
+          mkdir -p build-output
+          cp android/app/build/outputs/apk/debug/app-debug.apk build-output/SuleimaniGPT-v1.0.apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SuleimaniGPT-v1.0-APK
+          path: build-output/SuleimaniGPT-v1.0.apk
+
+      - name: Create GitHub Release & Upload APK
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        with:
+          tag_name: v1.0.0
+          name: "SuleimaniGPT v1.0.0 (Android APK)"
+          body: |
+            ## 📱 SuleimaniGPT (سلیمانی بلوچی اے آئی) Android Release
+            
+            ### ⬇️ Direct Download
+            Download the official **`SuleimaniGPT-v1.0.apk`** below to install directly on any Android smartphone.
+            
+            ### 🛠️ Installation Steps on Android:
+            1. Download `SuleimaniGPT-v1.0.apk` from the Assets below.
+            2. Tap the downloaded file in your browser or Files app.
+            3. If Android prompts *"Install unknown apps"*, tap **Allow / Settings** and grant permission for your browser.
+            4. Tap **Install** and open **SuleimaniGPT**!
+            5. Enter your free Google AI Studio API key to start chatting in pure Suleimani Balochi.
+          files: build-output/SuleimaniGPT-v1.0.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
