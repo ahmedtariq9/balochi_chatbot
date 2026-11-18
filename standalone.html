@@ -88,8 +88,15 @@
     <!-- Drawer Header -->
     <div class="p-4 border-b border-slate-800 flex items-center justify-between safe-top">
       <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-md">
-          س
+        <div class="w-8 h-8 rounded-xl overflow-hidden shadow-md border border-emerald-500/30 flex items-center justify-center shrink-0">
+          <svg class="w-full h-full" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="512" height="512" fill="#064e3b" />
+            <path d="M 80 370 L 175 240 L 265 370 Z" fill="#0f766e" opacity="0.6" />
+            <path d="M 255 370 L 340 255 L 432 370 Z" fill="#134e4a" opacity="0.45" />
+            <path d="M 256 150 L 140 370 L 256 370 Z" fill="#34d399" />
+            <path d="M 256 150 L 372 370 L 256 370 Z" fill="#065f46" />
+            <path d="M 256 116 Q 256 146 226 146 Q 256 146 256 176 Q 256 146 286 146 Q 256 146 256 116 Z" fill="#ffffff" />
+          </svg>
         </div>
         <div>
           <h1 class="font-bold text-sm text-white leading-tight">SuleimaniGPT</h1>
@@ -182,10 +189,19 @@
   <main id="chat-container" class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 max-w-2xl mx-auto w-full">
     <!-- Welcome Empty State -->
     <div id="starter-cards" class="py-6 sm:py-8 text-center animate-fade-in">
-      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-lg shadow-emerald-950/40 mx-auto mb-3 flex items-center justify-center">
-        <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-emerald-400 text-xl font-bold font-balochi">
-          س
-        </div>
+      <div class="w-14 h-14 rounded-2xl p-0.5 shadow-xl shadow-emerald-950/60 mx-auto mb-3 flex items-center justify-center">
+        <svg class="w-full h-full" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="24" y="24" width="464" height="464" rx="104" fill="#064e3b" stroke="#10b981" stroke-opacity="0.3" stroke-width="4" />
+          <path d="M 80 370 L 175 240 L 265 370 Z" fill="#0f766e" opacity="0.6" />
+          <path d="M 255 370 L 340 255 L 432 370 Z" fill="#134e4a" opacity="0.45" />
+          <path d="M 256 150 L 140 370 L 256 370 Z" fill="#34d399" />
+          <path d="M 256 150 L 372 370 L 256 370 Z" fill="#065f46" />
+          <line x1="256" y1="150" x2="256" y2="370" stroke="#ecfdf5" stroke-width="4" opacity="0.8" />
+          <path d="M 120 355 C 190 395 322 395 392 355 C 330 380 182 380 120 355 Z" fill="#6ee7b7" opacity="0.6" />
+          <circle cx="256" cy="146" r="28" fill="#fbbf24" opacity="0.4" />
+          <path d="M 256 116 Q 256 146 226 146 Q 256 146 256 176 Q 256 146 286 146 Q 256 146 256 116 Z" fill="#ffffff" />
+          <circle cx="256" cy="146" r="4.5" fill="#fef08a" />
+        </svg>
       </div>
 
       <h2 class="text-2xl sm:text-3xl font-bold font-balochi text-white mb-1.5 leading-snug">
