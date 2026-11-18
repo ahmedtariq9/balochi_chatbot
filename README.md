@@ -1,5 +1,9 @@
 # 🏔️ SuleimaniGPT (سلیمانی بلوچی اے آئی)
 
+<p align="center">
+  <img src="assets/logo.png" width="128" height="128" alt="SuleimaniGPT Logo" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</p>
+
 > **The First Dedicated Open-Source Conversational AI Engine Speaking Exclusively in Authentic Suleimani (Eastern) Balochi.**
 
 <p align="center">
