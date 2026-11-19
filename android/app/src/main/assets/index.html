@@ -620,7 +620,7 @@ FEW-SHOT EXAMPLES TO FOLLOW:
       verifyBtn.disabled = true;
 
       try {
-        const res = await fetch(`${API_BASE_URL}/models/${MODEL_NAME}:generateContent?key=${inputVal}`, {
+        let res = await fetch(${API_BASE_URL}/models/:generateContent?key=, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -629,14 +629,43 @@ FEW-SHOT EXAMPLES TO FOLLOW:
           })
         });
 
-        if (res.ok) {
+        let errData = null;
+        let errMsg = '';
+        if (!res.ok) {
+          errData = await res.json().catch(() => ({}));
+          errMsg = errData?.error?.message || '';
+        }
+
+        // If Google server returned 503/429 (temporary high demand spike), retry once after 1.5s
+        if (res.status === 503 || res.status === 429 || errMsg.toLowerCase().includes('high demand')) {
+          verifyBtn.innerText = 'Retrying ping (high demand)...';
+          await new Promise(r => setTimeout(r, 1500));
+          try {
+            res = await fetch(${API_BASE_URL}/models/:generateContent?key=, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: 'Ping' }] }],
+                generationConfig: { maxOutputTokens: 2, temperature: 0.1 }
+              })
+            });
+            if (!res.ok) {
+              errData = await res.json().catch(() => ({}));
+              errMsg = errData?.error?.message || '';
+            }
+          } catch (_) {}
+        }
+
+        // If 200 OK, OR if 503/429 (Google authenticated the key successfully, but servers are under heavy load):
+        // The API key is verified as VALID because Google gateway authenticated it before hitting the model!
+        const isHighDemand = res.status === 503 || res.status === 429 || errMsg.toLowerCase().includes('high demand') || errMsg.toLowerCase().includes('resource_exhausted');
+        if (res.ok || isHighDemand) {
           apiKey = inputVal;
           localStorage.setItem('suleimani_gemini_api_key', inputVal);
           updateKeyStatusUI();
           closeApiKeyModal();
         } else {
-          const errData = await res.json().catch(() => ({}));
-          errBox.innerText = errData?.error?.message || `HTTP ${res.status}: Invalid Key.`;
+          errBox.innerText = errMsg || HTTP : Invalid Key.;
           errBox.classList.remove('hidden');
         }
       } catch (err) {
